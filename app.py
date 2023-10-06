@@ -3,12 +3,18 @@ import chainlit as cl
 import os
 huggingfacehub_api_token = os.environ['HUGGINGFACEHUB_API_TOKEN']
 
-from langchain import HuggingFaceHub, PromptTemplate, LLMChain
+from langchain import HuggingFaceHub, PromptTemplate, LLMChain, OpenAI
+from langchain.chat_models import ChatOpenAI
+
+chat = ChatOpenAI()
 
 repo_id = "tiiuae/falcon-7b-instruct"
-llm = HuggingFaceHub(huggingfacehub_api_token=huggingfacehub_api_token, 
+llm = HuggingFaceHub(huggingfacehub_api_token=huggingfacehub_api_token,
+                     openai_api_key="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",
                      repo_id=repo_id, 
                      model_kwargs={"temperature":0.6, "max_new_tokens":2000})
+
+
 
 template = """
 You are an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions.
