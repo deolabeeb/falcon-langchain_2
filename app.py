@@ -4,13 +4,13 @@ import os
 huggingfacehub_api_token = os.environ['HUGGINGFACEHUB_API_TOKEN']
 
 from langchain import HuggingFaceHub, PromptTemplate, LLMChain, OpenAI
-from langchain.chat_models import ChatOpenAI
 
-chat = ChatOpenAI()
+openai_api_key="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"
+
+OPENAI_API_KEY=openai_api_key
 
 repo_id = "tiiuae/falcon-7b-instruct"
 llm = HuggingFaceHub(huggingfacehub_api_token=huggingfacehub_api_token,
-                     openai_api_key="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",
                      repo_id=repo_id, 
                      model_kwargs={"temperature":0.6, "max_new_tokens":2000})
 
@@ -24,9 +24,26 @@ You are an artificial intelligence assistant. The assistant gives helpful, detai
 """
 
 
-@cl.langchain_factory
-def factory():
+@cl.on_chat_start
+def main():
+    # Instantiate the chain for that user session
     prompt = PromptTemplate(template=template, input_variables=["question"])
-    llm_chain = LLMChain(prompt=prompt, llm=llm, verbose=True)
+    llm_chain = LLMChain(prompt=prompt, llm=OpenAI(temperature=0), verbose=True)
 
-    return llm_chain
+    # Store the chain in the user session
+    cl.user_session.set("llm_chain", llm_chain)
+
+
+@cl.on_message
+async def main(message: str):
+    # Retrieve the chain from the user session
+    llm_chain = cl.user_session.get("llm_chain")  # type: LLMChain
+
+    # Call the chain asynchronously
+    res = await llm_chain.acall(message, callbacks=[cl.AsyncLangchainCallbackHandler()])
+
+    # Do any post processing here
+
+    # "res" is a Dict. For this chain, we get the response by reading the "text" key.
+    # This varies from chain to chain, you should check which key to read.
+    await cl.Message(content=res["text"]).send()
