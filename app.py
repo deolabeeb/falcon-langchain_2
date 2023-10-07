@@ -6,7 +6,6 @@ huggingfacehub_api_token = os.environ['HUGGINGFACEHUB_API_TOKEN']
 from langchain import HuggingFaceHub, PromptTemplate, LLMChain
 # OpenAI
 
-# openai_api_key="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"
 
 # OPENAI_API_KEY=openai_api_key
 
